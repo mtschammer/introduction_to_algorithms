@@ -2,7 +2,9 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private int n;
+    private boolean calculatedPerlocation = false;
     private WeightedQuickUnionUF grid;
+    private WeightedQuickUnionUF shadowGrid;
     private int gridSize;
     private boolean[] siteStatuses;
 
@@ -14,6 +16,7 @@ public class Percolation {
 
         this.gridSize = n * n + 2;
         this.grid = new WeightedQuickUnionUF(this.gridSize);
+        this.shadowGrid = new WeightedQuickUnionUF(this.gridSize - 1);
         this.n = n;
         this.siteStatuses = new boolean[this.gridSize];
 
@@ -21,7 +24,8 @@ public class Percolation {
             this.siteStatuses[i] = false;
         }
 
-        this.siteStatuses[0] = this.siteStatuses[this.gridSize - 1] = true;
+        this.siteStatuses[0] = true;
+        this.siteStatuses[this.gridSize - 1] = true;
     }
 
     private int xyToId(int x, int y) {
@@ -40,25 +44,28 @@ public class Percolation {
         }
     }
 
-    public void connect(int indexP, int rowQ, int colQ) {
+    private void connect(int indexP, int rowQ, int colQ) {
         int indexQ = this.xyToId(rowQ, colQ);
         if (indexQ > -1 && this.isOpen(rowQ, colQ)) {
-            this.grid.union(indexP, indexQ);
+            if (this.grid != null) {
+                this.grid.union(indexP, indexQ);
+            }
+            this.shadowGrid.union(indexP, indexQ);
         }
     }
 
-    public boolean connected(int rowP, int colP, int rowQ, int colQ) {
+    private boolean connected(int rowP, int colP, int rowQ, int colQ) {
         int indexP = this.xyToId(rowP, colP);
         checkBounds(rowP, colP, indexP);
 
         int indexQ = this.xyToId(rowQ, colQ);
         checkBounds(rowQ, colQ, indexQ);
 
-        return this.grid.connected(indexP, indexQ);
+        return this.shadowGrid.connected(indexP, indexQ);
     }
 
 
-    public void open(int row, int col)       // open site (row, col) if it is not open already
+    public void open(int row, int col) // open site (row, col) if it is not open already
     {
         int index = this.xyToId(row, col);
         checkBounds(row, col, index);
@@ -73,40 +80,56 @@ public class Percolation {
 
             if (row == 1) {
                 // Top
-                this.grid.union(index, 0);
-            } else if (row == this.n) {
+                if (this.grid != null) {
+                    this.grid.union(index, 0);
+                }
+                this.shadowGrid.union(index, 0);
+            }
+
+            if (row == this.n) {
                 // Bottom
-                this.grid.union(index, this.gridSize - 1);
+                if (this.grid != null) {
+                    this.grid.union(index, this.gridSize - 1);
+                }
             }
         }
     }
 
-    public boolean isOpen(int row, int col)  // is site (row, col) open?
+    public boolean isOpen(int row, int col) // is site (row, col) open?
     {
         int index = this.xyToId(row, col);
         checkBounds(row, col, index);
         return this.siteStatuses[index];
     }
 
-    public boolean isFull(int row, int col)  // is site (row, col) full?
+    public boolean isFull(int row, int col) // is site (row, col) full?
     {
         int index = this.xyToId(row, col);
         checkBounds(row, col, index);
-        return this.grid.connected(0, index);
+
+        return this.shadowGrid.connected(0, index);
     }
 
-    public boolean percolates()              // does the system percolate?
+    public boolean percolates() // does the system percolate?
     {
-        return this.grid.connected(0, this.gridSize - 1);
+        if (this.calculatedPerlocation) {
+            return true;
+        }
+
+        this.calculatedPerlocation = this.grid.connected(0, this.gridSize - 1);
+        if (this.calculatedPerlocation) {
+            this.grid = null;
+        }
+
+        return this.calculatedPerlocation;
     }
 
-    public static void main(String[] args)   // test client (optional)
+    public static void main(String[] args) // test client (optional)
     {
-
-        Percolation perc = new Percolation(5);
+        Percolation perc = new Percolation(64);
         System.out.println(String.format("Connected (1,2) and (2,2): %b", perc.connected(1, 2, 2, 2)));
         System.out.println(String.format("Full (4,3): %b", perc.isFull(4, 3)));
-        System.out.println(String.format("Percolcates: %b", perc.percolates()));
+        System.out.println(String.format("Percolates: %b", perc.percolates()));
 
         perc.open(1, 2);
         perc.open(2, 2);
@@ -117,6 +140,7 @@ public class Percolation {
         System.out.println(String.format("Full (4,3): %b", perc.isFull(4, 3)));
         perc.open(5, 3);
 
-        System.out.println(String.format("Percolcates: %b", perc.percolates()));
+        System.out.println(String.format("Percolates: %b", perc.percolates()));
+
     }
 }
