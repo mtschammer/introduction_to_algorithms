@@ -1,4 +1,4 @@
- import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private int n;
@@ -9,32 +9,27 @@ public class Percolation {
     private boolean percolationStatus;
 
     public Percolation(int n) {
-        int gridSize;
-
         this.percolationStatus = false;
 
         if (n < 1) {
             throw new IllegalArgumentException("Please specify a value of n > 0");
         }
 
-        gridSize = n * n + 1;
+        int gridSize = n * n;
         this.grid = new WeightedQuickUnionUF(gridSize);
         this.n = n;
         this.siteStatuses = new byte[gridSize];
 
-        for (int i = 1; i < gridSize; i++) {
+        for (int i = 0; i < gridSize; i++) {
             this.siteStatuses[i] = 0;
         }
-
-        this.siteStatuses[0] = 2;
-
     }
 
     private int xyToId(int x, int y) {
         int index = -1;
 
         if (x > 0 && y > 0 && x <= this.n && y <= this.n) {
-            index = ((x - 1) * n) + y;
+            index = (((x - 1) * n) + y) - 1;
         }
 
         return index;
@@ -51,10 +46,18 @@ public class Percolation {
         if (indexQ > -1 && this.isOpen(rowQ, colQ)) {
 
             int rootQ = this.grid.find(indexQ);
+            int rootP = -1;
 
             if (this.connectedToBottom(rootQ, indexQ, rowQ)) {
-                int rootP = this.grid.find(indexP);
+                rootP = this.grid.find(indexP);
                 this.connectToBottom(rootP, indexP);
+            }
+
+            if (this.connectedToTop(rootQ, indexQ, rowQ)) {
+                if (rootP < 0) {
+                    rootP = this.grid.find(indexP);
+                }
+                this.connectToTop(rootP, indexP);
             }
 
             this.grid.union(indexP, indexQ);
@@ -62,8 +65,9 @@ public class Percolation {
     }
 
     private boolean connectedToBottom(int root, int index, int row) {
-        if (row == this.n || this.siteStatuses[root] == 2 || this.siteStatuses[root] == 4 ||
-                this.siteStatuses[index] == 2 || this.siteStatuses[index] == 4) {
+        if ((row == this.n && this.siteStatuses[index] > 0)
+                || this.siteStatuses[index] == 2 || this.siteStatuses[index] == 4
+                || this.siteStatuses[root] == 2 || this.siteStatuses[root] == 4) {
             return true;
         }
 
@@ -74,25 +78,32 @@ public class Percolation {
         if (this.siteStatuses[root] == 3 || this.siteStatuses[root] == 4) {
             this.siteStatuses[root] = 4;
             this.siteStatuses[index] = 4;
+            this.percolationStatus = true;
         } else {
             this.siteStatuses[root] = 2;
             this.siteStatuses[index] = 2;
         }
     }
 
-    private boolean connectedToTop(int root, int index, int row, int col) {
-        if (this.grid.connected(0, root)) {
-            if (this.siteStatuses[root] == 2 || this.siteStatuses[root] == 4) {
-                this.siteStatuses[root] = 4;
-                this.siteStatuses[index] = 4;
-            } else {
-                this.siteStatuses[root] = 3;
-                this.siteStatuses[index] = 3;
-            }
+    private boolean connectedToTop(int root, int index, int row) {
+        if ((row == 1 && this.siteStatuses[index] > 0)
+                || this.siteStatuses[index] == 3 || this.siteStatuses[index] == 4
+                || this.siteStatuses[root] == 3 || this.siteStatuses[root] == 4) {
             return true;
         }
 
         return false;
+    }
+
+    private void connectToTop(int root, int index) {
+        if (this.siteStatuses[root] == 2 || this.siteStatuses[root] == 4) {
+            this.siteStatuses[root] = 4;
+            this.siteStatuses[index] = 4;
+            this.percolationStatus = true;
+        } else {
+            this.siteStatuses[root] = 3;
+            this.siteStatuses[index] = 3;
+        }
     }
 
 
@@ -109,11 +120,6 @@ public class Percolation {
             this.connect(index, row - 1, col); // Up
             this.connect(index, row + 1, col); // Down
 
-            if (row == 1) {
-                // Top
-                this.grid.union(index, 0);
-            }
-
             int root = this.grid.find(index);
             boolean bottom = this.connectedToBottom(root, index, row);
 
@@ -121,10 +127,9 @@ public class Percolation {
                 this.connectToBottom(root, index);
             }
 
-            boolean top = this.connectedToTop(root, index, row, col);
-
-            if (bottom && top) {
-                this.percolationStatus = true;
+            boolean top = this.connectedToTop(root, index, row);
+            if (top) {
+                this.connectToTop(root, index);
             }
         }
     }
@@ -142,7 +147,9 @@ public class Percolation {
         checkBounds(row, col, index);
 
         int root = this.grid.find(index);
-        this.connectedToTop(root, index, row, col);
+        if (this.connectedToTop(root, index, row)) {
+            this.connectToTop(root, index);
+        }
         return this.siteStatuses[index] > 2;
     }
 
