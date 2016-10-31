@@ -1,0 +1,24 @@
+Week 1: Analysis of Algorithms
+DOUBLING HYPOTHESIS:
+	RUNNING TIME:
+	a = constant factor - computer power
+	b = changing based on frequency (algo. + data size)
+	co = Runtime / Runtime previous
+	b = lg(co)
+	Runtime = a * N^b
+
+
+	co = 4.019607843
+	b = 2.00705475748
+	Let T(N) = 20.5
+	N = 64000
+	T(N) = a * N^2.00705475748
+	20.5 = a * 64000^2.00705475748
+	a = 4.629*10^-9
+	20.5 = 4.629*10^-9 * 64000^2.00705475748
+	T(N) = 4.629*10^-9 * N^2.00705475748
+
+
+Runtime = cost * frequency
+	cost = depends on machine
+	frequency = depends on algorithm + input data
