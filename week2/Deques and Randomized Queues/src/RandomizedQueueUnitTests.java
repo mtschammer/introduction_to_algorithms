@@ -26,13 +26,20 @@ public class RandomizedQueueUnitTests {
             printRandomizedQueue(rq);
         }
 
-        System.out.println("Nested test:");
+        System.out.println("\nNested test:");
+        int i = 0;
         for (String s : rq) {
+            int j = 0;
+            System.out.print(String.format("s: %s - s2: ", s));
             for (String s2 : rq) {
-                System.out.print(String.format("(s: %s, s2: %s) ", s, s2));
+                System.out.print(String.format("%s ", s2));
+                j++;
             }
-            System.out.println("");
+            rq.dequeue();
+            System.out.println(String.format(" (%d)", j));
+            i++;
         }
+        System.out.println(String.format("(%d)", i));
     }
 
     private static void testResizing(){

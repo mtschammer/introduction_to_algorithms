@@ -107,13 +107,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private class RandomizedQueueIterator implements Iterator<Item> {
 
         int iterSize;
-        int[] indexes;
+        private Item[] iterQueue;
 
         public RandomizedQueueIterator() {
             this.iterSize = size;
-            this.indexes = new int[size];
+            this.iterQueue = (Item[]) new Object[this.iterSize];
             for (int i = 0; i < this.iterSize; i++) {
-                this.indexes[i] = i;
+                this.iterQueue[i] = queue[i];
             }
         }
 
@@ -126,11 +126,11 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
             if (this.iterSize > 1) {
                 int nextIndex = StdRandom.uniform(0, this.iterSize - 1);
-                item = queue[this.indexes[nextIndex]];
-                this.indexes[nextIndex] = this.indexes[iterSize - 1];
-                this.indexes[iterSize - 1] = -1;
+                item = this.iterQueue[nextIndex];
+                this.iterQueue[nextIndex] = this.iterQueue[iterSize - 1];
+                this.iterQueue[iterSize - 1] = null;
             } else{
-                item = queue[this.indexes[0]];
+                item = iterQueue[0];
             }
 
             this.iterSize--;
