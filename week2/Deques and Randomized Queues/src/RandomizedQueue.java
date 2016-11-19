@@ -3,16 +3,15 @@ import edu.princeton.cs.algs4.StdRandom;
 import java.util.Iterator;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
+    private static final int REMOVE = 0, ADD = 1;
+    private static final double QUARTER_FULL = 0.25, FULL = 1.0;
     private Item[] queue;
     private int size = 0;
-
-    private static final int REMOVE = 0, ADD = 1;
-    private static final double QUARTER_FULL = 0.25;
 
 
     // construct an empty randomized queue
     public RandomizedQueue() {
-        this.queue = (Item[]) new Object[512];
+        this.queue = (Item[]) new Object[1];
     }
 
     private void emptyCheck() {
@@ -27,10 +26,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
     }
 
-    private void copyQueue(int newSize) {
+    private void copyQueue(int currentSize, int newSize) {
         Item[] newQueue = (Item[]) new Object[newSize];
 
-        for(int i = 0; i < this.size; i++){
+        for (int i = 0; i < currentSize; i++) {
             newQueue[i] = this.queue[i];
             this.queue[i] = null;
         }
@@ -42,13 +41,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         double oldUtilizedRatio = (double) oldSize / this.queue.length;
         double newUtilizedRatio = (double) newSize / this.queue.length;
 
-        if (operation == ADD && newSize == this.queue.length) {
-            this.copyQueue(this.queue.length * 2);
+        if (operation == ADD && newUtilizedRatio == FULL) {
+            this.copyQueue(oldSize + 1, this.queue.length * 2);
         } else if (operation == REMOVE && oldUtilizedRatio > QUARTER_FULL
                 && newUtilizedRatio <= QUARTER_FULL) {
 
-            // +1 to round up result if length is uneven number.
-            this.copyQueue((this.queue.length + 1) / 2);
+            // +1 to newSize to round up result if length is uneven number.
+            this.copyQueue(oldSize - 1, (this.queue.length + 1) / 2);
         }
     }
 
@@ -81,7 +80,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             item = this.queue[0];
             this.queue[0] = null;
         } else {
-            int index = StdRandom.uniform(0, this.size - 1);
+            int index = StdRandom.uniform(0, this.size);
             item = this.queue[index];
             this.queue[index] = this.queue[this.size - 1];
             this.queue[size - 1] = null;
@@ -98,7 +97,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         if (this.size == 1) {
             item = this.queue[0];
         } else {
-            int index = StdRandom.uniform(0, this.size - 1);
+            int index = StdRandom.uniform(0, this.size);
             item = this.queue[index];
         }
         return item;
@@ -106,7 +105,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     private class RandomizedQueueIterator implements Iterator<Item> {
 
-        int iterSize;
+        private int iterSize;
         private Item[] iterQueue;
 
         public RandomizedQueueIterator() {
@@ -122,19 +121,23 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         public Item next() {
-            Item item;
+            if (this.hasNext()) {
+                Item item;
 
-            if (this.iterSize > 1) {
-                int nextIndex = StdRandom.uniform(0, this.iterSize - 1);
-                item = this.iterQueue[nextIndex];
-                this.iterQueue[nextIndex] = this.iterQueue[iterSize - 1];
-                this.iterQueue[iterSize - 1] = null;
-            } else{
-                item = iterQueue[0];
+                if (this.iterSize > 1) {
+                    int nextIndex = StdRandom.uniform(0, this.iterSize);
+                    item = this.iterQueue[nextIndex];
+                    this.iterQueue[nextIndex] = this.iterQueue[iterSize - 1];
+                    this.iterQueue[iterSize - 1] = null;
+                } else {
+                    item = iterQueue[0];
+                }
+
+                this.iterSize--;
+                return item;
             }
 
-            this.iterSize--;
-            return item;
+            throw new java.util.NoSuchElementException();
         }
 
         public void remove() {

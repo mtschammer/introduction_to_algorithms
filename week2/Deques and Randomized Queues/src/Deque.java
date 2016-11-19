@@ -120,9 +120,13 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         public Item next() {
-            Item item = this.current.item;
-            this.current = this.current.next;
-            return item;
+            if (this.hasNext()) {
+                Item item = this.current.item;
+                this.current = this.current.next;
+                return item;
+            }
+
+            throw new java.util.NoSuchElementException();
         }
 
         public void remove() {
