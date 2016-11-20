@@ -8,6 +8,7 @@
  *
  ******************************************************************************/
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 import edu.princeton.cs.algs4.StdDraw;
@@ -95,8 +96,8 @@ public class Point implements Comparable<Point> {
             double slopeA = slopeTo(a);
             double slopeB = slopeTo(b);
 
+            if(slopeA < slopeB) return -1;
             if(slopeA > slopeB) return 1;
-            else if(slopeA < slopeB) return -1;
 
             return 0;
         }
@@ -131,8 +132,38 @@ public class Point implements Comparable<Point> {
      */
     public static void main(String[] args) {
         /* YOUR CODE HERE */
-        Point a = new Point(3, 2);
-        Point b = new Point(5, 2);
+        Point a0 = new Point(9, 7);
+        Point c = new Point(5, 7);
+        Point e = new Point(8, 7);
+        Point a = new Point(1, 1);
+        Point b = new Point(2, 7);
+        Point d = new Point(6, 7);
+
+
         System.out.println(a.slopeTo(b));
+        System.out.println(a.slopeTo(c));
+        System.out.println(a.slopeTo(d));
+        System.out.println(a.slopeTo(e));
+        System.out.println("----");
+        System.out.println(b.slopeTo(c));
+        System.out.println(b.slopeTo(d));
+        System.out.println(b.slopeTo(e));
+
+        System.out.println("----");
+
+        Point[] points = {a0, c, e, a, b, d};
+
+        Arrays.sort(points, 1, 6);
+        for(Point p : points){
+            System.out.println(p);
+        }
+
+        System.out.println("----");
+
+        LineSegment ls0 = new LineSegment(a0, a);
+        LineSegment ls1 = new LineSegment(a0, a);
+
+        System.out.println(ls0 == ls1);
+        System.out.println(ls0.toString().equals(ls1.toString()));
     }
 }

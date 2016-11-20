@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BruteCollinearPoints {
-    private LineSegment[] segments;
+    private LineSegment[] foundSegments;
 
     private void nullCheck(Point p) {
         if (p == null) {
@@ -21,7 +21,7 @@ public class BruteCollinearPoints {
         return slope;
     }
 
-    // finds all line segments containing 4 points
+    // finds all line foundSegments containing 4 points
     public BruteCollinearPoints(Point[] points) {
         ArrayList<LineSegment> segments = new ArrayList<>();
 
@@ -55,17 +55,17 @@ public class BruteCollinearPoints {
             }
         }
 
-        this.segments = segments.toArray(new LineSegment[segments.size()]);
+        this.foundSegments = segments.toArray(new LineSegment[segments.size()]);
     }
 
-    // the number of line segments
+    // the number of line foundSegments
     public int numberOfSegments() {
-        return this.segments.length;
+        return this.foundSegments.length;
     }
 
-    // the line segments
+    // the line foundSegments
     public LineSegment[] segments() {
-        return this.segments;
+        return this.foundSegments;
     }
 
     public static void main(String[] args) {
@@ -88,7 +88,7 @@ public class BruteCollinearPoints {
         }
         StdDraw.show();
 
-        // print and draw the line segments
+        // print and draw the line foundSegments
         BruteCollinearPoints collinear = new BruteCollinearPoints(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
