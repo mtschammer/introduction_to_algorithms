@@ -33,10 +33,10 @@ public class FastCollinearPoints {
                     pointCounter++;
 
                     if (j == pc.length - 1) {
-                        saveLineSegment(pointCounter, i, j+1, pc, currentPointSlope);
+                        saveLineSegment(pointCounter, i, j+1, pc);
                     }
                 } else {
-                    saveLineSegment(pointCounter, i, j, pc, currentPointSlope);
+                    saveLineSegment(pointCounter, i, j, pc);
                     pointCounter = 2;
                     currentSegmentSlope = currentPointSlope;
                 }
@@ -46,10 +46,11 @@ public class FastCollinearPoints {
     }
 
     private void saveLineSegment(int pointCounter, int i, int j,
-                                 Point[] pc, double currentPointSlope) {
+                                 Point[] pc) {
         if (pointCounter > 3) {
             int beginning = j - (pointCounter - 1);
             int end = j - 1;
+            double currentPointSlope = this.degenerateCheck(pc[i].slopeTo(pc[end]));
             Arrays.sort(pc, beginning, j);
 
             if (pc[i].compareTo(pc[beginning]) < 1) beginning = i;
