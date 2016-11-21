@@ -6,7 +6,42 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BruteCollinearPoints {
-    private LineSegment[] foundSegments;
+    private ArrayList<LineSegment> foundSegments = new ArrayList<>();
+
+    // finds all line foundSegments containing 4 points
+    public BruteCollinearPoints(Point[] points) {
+        if (points == null) {
+            throw new java.lang.NullPointerException();
+        }
+
+        Point[] pointsCopied = new Point[points.length];
+        System.arraycopy(points, 0, pointsCopied, 0, points.length);
+
+        Arrays.sort(pointsCopied);
+
+        for (int i = 0; i < pointsCopied.length; i++) {
+            this.nullCheck(pointsCopied[i]);
+            for (int j = i+1; j < pointsCopied.length; j++) {
+                this.nullCheck(pointsCopied[j]);
+                this.degenerateCheck(pointsCopied[i].slopeTo(pointsCopied[j]));
+                for (int k = j + 1; k < pointsCopied.length; k++) {
+                    this.nullCheck(pointsCopied[k]);
+                    this.degenerateCheck(pointsCopied[i].slopeTo(pointsCopied[k]));
+                    for (int l = k + 1; l < pointsCopied.length; l++) {
+                        this.nullCheck(pointsCopied[l]);
+
+                        double slopeQ = this.degenerateCheck(pointsCopied[i].slopeTo(pointsCopied[l]));
+                        double slopeR = pointsCopied[i].slopeTo(pointsCopied[k]);
+                        double slopeS = pointsCopied[i].slopeTo(pointsCopied[j]);
+
+                        if (slopeQ == slopeR && slopeQ == slopeS) {
+                            foundSegments.add(new LineSegment(pointsCopied[i], pointsCopied[l]));
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private void nullCheck(Point p) {
         if (p == null) {
@@ -21,51 +56,14 @@ public class BruteCollinearPoints {
         return slope;
     }
 
-    // finds all line foundSegments containing 4 points
-    public BruteCollinearPoints(Point[] points) {
-        ArrayList<LineSegment> segments = new ArrayList<>();
-
-        if (points == null) {
-            throw new java.lang.NullPointerException();
-        }
-
-        Arrays.sort(points);
-
-        for (int i = 0; i < points.length - 3; i++) {
-            this.nullCheck(points[i]);
-            for (int j = points.length - 1; j > i + 2; j--) {
-                this.nullCheck(points[j]);
-                for (int k = j - 1; k > i + 1; k--) {
-                    this.nullCheck(points[k]);
-                    this.degenerateCheck(points[k].slopeTo(points[j]));
-                    for (int l = k - 1; l > i; l--) {
-                        this.nullCheck(points[l]);
-                        this.degenerateCheck(points[l].slopeTo(points[k]));
-                        this.degenerateCheck(points[l].slopeTo(points[j]));
-
-                        double slopeQ = this.degenerateCheck(points[i].slopeTo(points[l]));
-                        double slopeR = this.degenerateCheck(points[i].slopeTo(points[k]));
-                        double slopeS = this.degenerateCheck(points[i].slopeTo(points[j]));
-
-                        if (slopeQ == slopeR && slopeQ == slopeS) {
-                            segments.add(new LineSegment(points[i], points[j]));
-                        }
-                    }
-                }
-            }
-        }
-
-        this.foundSegments = segments.toArray(new LineSegment[segments.size()]);
-    }
-
     // the number of line foundSegments
     public int numberOfSegments() {
-        return this.foundSegments.length;
+        return this.foundSegments.size();
     }
 
     // the line foundSegments
     public LineSegment[] segments() {
-        return this.foundSegments;
+        return this.foundSegments.toArray(new LineSegment[this.foundSegments.size()]);
     }
 
     public static void main(String[] args) {

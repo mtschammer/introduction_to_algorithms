@@ -2,12 +2,85 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 
-import javax.sound.sampled.Line;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class FastCollinearPoints {
-    private LineSegment[] foundSegments;
+    private ArrayList<LineSegment> foundSegments = new ArrayList<>();
+    private ArrayList<EndPoint> endPoints = new ArrayList<>();
+
+    // finds all line foundSegments containing 4 points
+    public FastCollinearPoints(Point[] points) {
+        if (points == null) {
+            throw new NullPointerException();
+        }
+
+        Point[] pc = new Point[points.length];
+        System.arraycopy(points, 0, pc, 0, points.length);
+
+        Arrays.sort(pc);
+
+        for (int i = 0; i < pc.length; i++) {
+            Arrays.sort(pc, i + 1, pc.length,
+                    pc[i].slopeOrder());
+
+            int pointCounter = 2;
+            double currentSegmentSlope = Double.NEGATIVE_INFINITY;
+            for (int j = i + 1; j < pc.length; j++) {
+                double currentPointSlope = this.degenerateCheck(pc[i].slopeTo(pc[j]));
+
+                if (currentSegmentSlope == currentPointSlope) {
+                    pointCounter++;
+
+                    if (j == pc.length - 1) {
+                        saveLineSegment(pointCounter, i, j+1, pc, currentPointSlope);
+                    }
+                } else {
+                    saveLineSegment(pointCounter, i, j, pc, currentPointSlope);
+                    pointCounter = 2;
+                    currentSegmentSlope = currentPointSlope;
+                }
+            }
+            Arrays.sort(pc, i + 1, pc.length);
+        }
+    }
+
+    private void saveLineSegment(int pointCounter, int i, int j,
+                                 Point[] pc, double currentPointSlope) {
+        if (pointCounter > 3) {
+            int beginning = j - (pointCounter - 1);
+            int end = j - 1;
+            Arrays.sort(pc, beginning, j);
+
+            if (pc[i].compareTo(pc[beginning]) < 1) beginning = i;
+            if (pc[i].compareTo(pc[end]) > 0) end = i;
+
+            if (!alreadyAdded(currentPointSlope, pc[end])) {
+                this.foundSegments.add(new LineSegment(pc[beginning], pc[end]));
+                this.endPoints.add(new EndPoint(currentPointSlope, pc[end]));
+            }
+        }
+    }
+
+    private class EndPoint {
+        public double slope;
+        public Point point;
+
+        public EndPoint(double slope, Point point) {
+            this.slope = slope;
+            this.point = point;
+        }
+    }
+
+    private boolean alreadyAdded(double slope, Point endPoint) {
+        for (EndPoint ep : this.endPoints) {
+            if (ep.point.compareTo(endPoint) == 0 && ep.slope == slope) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private void nullCheck(Point p) {
         if (p == null) {
@@ -22,71 +95,14 @@ public class FastCollinearPoints {
         return slope;
     }
 
-    // finds all line foundSegments containing 4 points
-    public FastCollinearPoints(Point[] points) {
-        ArrayList<LineSegment> segments = new ArrayList<>();
-
-        if (points == null) {
-            throw new NullPointerException();
-        }
-
-        for (int i = 0; i < points.length; i++) {
-            Arrays.sort(points);
-            Arrays.sort(points, points[i].slopeOrder());
-
-            int j = 1;
-            int end;
-            while (j < points.length) {
-                double slope = this.degenerateCheck(points[0].slopeTo(points[j]));
-                int segmentsCounter = 1;
-
-                while (j + segmentsCounter < points.length -1  &&
-                        points[0].slopeTo(points[j + segmentsCounter]) == slope) {
-                    segmentsCounter++;
-                }
-                segmentsCounter++;
-                if (segmentsCounter > 3) {
-                    end = j + segmentsCounter-1;
-                    end = end > points.length ? points.length: end;
-                    Arrays.sort(points, j, end);
-
-                    int smallest = j;
-                    if(points[0].compareTo(points[j]) < 1) smallest = 0;
-
-                    int largest = j + segmentsCounter-2;
-                    if(points[0].compareTo(points[largest]) > 0) largest = 0;
-
-                    LineSegment lsNew = new LineSegment(points[smallest],
-                            points[largest]);
-                    boolean found = false;
-                    for (LineSegment lsExisting : segments) {
-                        if (lsExisting.toString().equals(lsNew.toString())){
-                            found = true;
-                        }
-                    }
-
-                    if(!found){
-                        segments.add(lsNew);
-                    }
-                } else {
-                    end = j+1;
-                }
-
-                j = end;
-            }
-        }
-
-        this.foundSegments = segments.toArray(new LineSegment[segments.size()]);
-    }
-
     // the number of line foundSegments
     public int numberOfSegments() {
-        return this.foundSegments.length;
+        return this.foundSegments.size();
     }
 
     // the line foundSegments
     public LineSegment[] segments() {
-        return this.foundSegments;
+        return this.foundSegments.toArray(new LineSegment[this.foundSegments.size()]);
     }
 
     public static void main(String[] args) {

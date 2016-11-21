@@ -66,8 +66,8 @@ public class Point implements Comparable<Point> {
 
         if (this.compareTo(that) == 0) slope = Double.NEGATIVE_INFINITY;
         else if (that.y == this.y) slope = 0.0;
-        else if (that.x == this.x) slope = Double.POSITIVE_INFINITY ;
-        else slope = (that.y - this.y) / (double)(that.x - this.x);
+        else if (that.x == this.x) slope = Double.POSITIVE_INFINITY;
+        else slope = (that.y - this.y) / (double) (that.x - this.x);
 
         return slope;
     }
@@ -91,13 +91,13 @@ public class Point implements Comparable<Point> {
         return 0;
     }
 
-    private class BySlope implements Comparator<Point>{
-        public int compare(Point a, Point b){
+    private class BySlope implements Comparator<Point> {
+        public int compare(Point a, Point b) {
             double slopeA = slopeTo(a);
             double slopeB = slopeTo(b);
 
-            if(slopeA < slopeB) return -1;
-            if(slopeA > slopeB) return 1;
+            if (slopeA < slopeB) return -1;
+            if (slopeA > slopeB) return 1;
 
             return 0;
         }
@@ -154,7 +154,7 @@ public class Point implements Comparable<Point> {
         Point[] points = {a0, c, e, a, b, d};
 
         Arrays.sort(points, 1, 6);
-        for(Point p : points){
+        for (Point p : points) {
             System.out.println(p);
         }
 
